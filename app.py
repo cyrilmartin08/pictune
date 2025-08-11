@@ -118,7 +118,7 @@ def analyze_video(video_path):
     return max(set(moods), key=moods.count) if moods else "happy"
 
 # --- Streamlit UI ---
-st.title("PicTune - AI Mood Detector ")
+st.title("PicTune - AI Mood & Music Matcher 🎵")
 uploaded_file = st.file_uploader("Upload an image or video", type=["jpg", "jpeg", "png", "mp4"])
 
 if uploaded_file is not None:
