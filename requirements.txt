@@ -1,5 +1,4 @@
 streamlit
-gradio
 opencv-python
 colorthief
 numpy
