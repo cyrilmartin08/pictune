@@ -1,4 +1,4 @@
-# PicTune - AI Mood Detector 🎵
+# PicTune - AI Mood & Music Matcher 🎵
 
 PicTune is an AI-powered web app that detects the mood of an uploaded image or video
 and plays music matching that mood.
