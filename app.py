@@ -5,6 +5,8 @@ import os
 import numpy as np
 import colorsys
 
+import gradio as gr
+
 # --- Simple Theme Styling ---
 st.markdown(
     """
@@ -188,3 +190,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+if __name__ == "__main__":
+    app.launch(server_name="0.0.0.0", server_port=int(os.environ.get("PORT", 5000)))
