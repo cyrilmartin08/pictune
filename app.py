@@ -5,7 +5,7 @@ import os
 import numpy as np
 import colorsys
 
-import gradio as gr
+# import gradio as gr
 
 # --- Simple Theme Styling ---
 st.markdown(
