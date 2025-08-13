@@ -13,28 +13,17 @@ st.markdown(
     .stApp {
         background-color: #83EEFF;
         font-family: 'Segoe UI', sans-serif;
+        padding: 1rem;
         display: flex;
         flex-direction: column;
         min-height: 100vh; /* Make sure the app takes at least the full viewport height */
-        padding: 1rem; /* A little extra padding for the whole app */
     }
-    
-    /* Centralize the block container to handle spacing */
-    .block-container {
-        padding-top: 1rem !important;
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-        flex-grow: 1; /* Allow content to grow and push the footer down */
-    }
-
     /* Main title styling */
     h1 {
         color: black !important;
         text-align: center;
         font-size: 3rem !important;
         font-weight: 800 !important;
-        margin-top: 0 !important; /* Remove default top margin */
-        padding-top: 20px; /* Add padding to the top of the title */
         margin-bottom: 20px;
     }
     /* Subtitle: file uploader label */
@@ -93,7 +82,7 @@ st.markdown(
         color: #003344;
         margin-top: auto; /* Push the footer to the bottom */
         padding-top: 20px;
-        padding-bottom: 10px;
+        padding-bottom: 10px; /* Add proper spacing at the bottom */
     }
     </style>
     """,
