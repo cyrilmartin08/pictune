@@ -134,7 +134,7 @@ def detect_mood_from_palette(palette):
 # --- Basic facial emotion detection using OpenCV ---
 def detect_facial_mood(image_path):
     """
-    Detects basic facial emotions (happy, calm, neutral) using Haar cascades.
+    Detects basic facial emotions (happy, calm, sad, neutral, angry, fearful, disgusted, surprised) using Haar cascades.
     Note: More complex emotions like surprise or fear require a more advanced
     model than simple cascades.
     """
