@@ -4,7 +4,7 @@ PicTune is an AI-powered web app that detects the mood of an uploaded image or v
 and plays music matching that mood.
 
 ## Features
-- Detects moods: Happy, Sad, Angry, Calm, Dreamy
+- Detects moods: Happy, Sad, Angry, Calm, Surprised, Neutral, Fearful, Disgusted
 - Works with images & videos
 - Simple, stylish Streamlit UI
 - Plays background music based on mood
