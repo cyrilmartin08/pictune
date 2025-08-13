@@ -14,6 +14,9 @@ st.markdown(
         background-color: #83EEFF;
         font-family: 'Segoe UI', sans-serif;
         padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh; /* Make sure the app takes at least the full viewport height */
     }
     /* Main title styling */
     h1 {
@@ -28,11 +31,19 @@ st.markdown(
         color: black !important;
         font-size: 1.3rem !important;
         font-weight: 600 !important;
+        text-align: center; /* Centralize the label text */
+        width: 100%;
+        display: block;
     }
     /* Upload box styling */
+    .stFileUploader > div > div {
+        display: flex;
+        justify-content: center; /* Centralize the drag-and-drop box */
+    }
     .stFileUploader {
         transform: scale(1.1);
         margin: 20px 0;
+        padding: 0 10px; /* Add some space on the sides for a better look */
     }
     /* File uploader button style */
     .stFileUploader > div > div > div > button {
@@ -69,7 +80,9 @@ st.markdown(
         text-align: center;
         font-size: 0.9rem;
         color: #003344;
-        margin-top: 50px;
+        margin-top: auto; /* Push the footer to the bottom */
+        padding-top: 20px;
+        padding-bottom: 10px; /* Add proper spacing at the bottom */
     }
     </style>
     """,
