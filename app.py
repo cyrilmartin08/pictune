@@ -5,24 +5,47 @@ import os
 import numpy as np
 import colorsys
 
-# import gradio as gr
-
-# --- Simple Theme Styling ---
+# --- Simple Theme Styling for better mobile view ---
 st.markdown(
     """
     <style>
+    /* Full page styling */
     .stApp {
         background-color: #83EEFF;
         font-family: 'Segoe UI', sans-serif;
+        padding: 1rem;
     }
+    /* Main title styling */
     h1 {
-        color: #003344;
+        color: black !important;
         text-align: center;
+        font-size: 3rem !important;
+        font-weight: 800 !important;
+        margin-bottom: 20px;
     }
+    /* Subtitle: file uploader label */
+    .stFileUploader label {
+        color: black !important;
+        font-size: 1.3rem !important;
+        font-weight: 600 !important;
+    }
+    /* Upload box styling */
+    .stFileUploader {
+        transform: scale(1.1);
+        margin: 20px 0;
+    }
+    /* File uploader button style */
+    .stFileUploader > div > div > div > button {
+        background-color: white !important;
+        color: #003344 !important;
+        border: 2px solid #003344 !important;
+    }
+    /* Uploaded file details */
     .uploadedFile {
         border-radius: 10px;
         padding: 10px;
     }
+    /* Mood detection box style */
     .mood-box {
         background-color: white;
         padding: 12px;
@@ -34,6 +57,20 @@ st.markdown(
         box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
         margin-top: 15px;
     }
+    /* General responsive images/videos */
+    .stImage > img, .stVideo > video {
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+    }
+    /* Footer styling */
+    .footer {
+        text-align: center;
+        font-size: 0.9rem;
+        color: #003344;
+        margin-top: 50px;
+    }
     </style>
     """,
     unsafe_allow_html=True
@@ -41,11 +78,29 @@ st.markdown(
 
 # --- Mood detection from color palette ---
 def detect_mood_from_palette(palette):
+    """
+    Analyzes a color palette to determine a mood based on simple heuristics.
+    This function has been expanded to include more moods.
+    """
     hsv_palette = [colorsys.rgb_to_hsv(r / 255, g / 255, b / 255) for r, g, b in palette]
     hues = [h for h, s, v in hsv_palette]
     sats = [s for h, s, v in hsv_palette]
     vals = [v for h, s, v in hsv_palette]
 
+    avg_sat = np.mean(sats)
+    avg_val = np.mean(vals)
+
+    # Heuristics for the new moods
+    if avg_sat < 0.2 and avg_val > 0.5:
+        return "neutral"
+    if avg_sat > 0.7 and avg_val > 0.7:
+        return "surprised"
+    if avg_val < 0.3:
+        return "fearful"  # Dark, low-value colors
+    if any(0.2 < h < 0.35 for h in hues) and avg_sat > 0.4:
+        return "disgusted" # Greenish hues
+
+    # Original moods logic
     if all(v < 0.3 for v in vals):
         return "angry"
     if all(v > 0.8 for v in vals) and all(s < 0.3 for s in sats):
@@ -60,10 +115,16 @@ def detect_mood_from_palette(palette):
         return "sad"
     if any(0.7 < h < 0.9 for h in hues):
         return "dreamy"
-    return "happy"
+
+    return "neutral" # A better fallback than "happy"
 
 # --- Basic facial emotion detection using OpenCV ---
 def detect_facial_mood(image_path):
+    """
+    Detects basic facial emotions (happy, calm, neutral) using Haar cascades.
+    Note: More complex emotions like surprise or fear require a more advanced
+    model than simple cascades.
+    """
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
     smile_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_smile.xml")
     eyes_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_eye.xml")
@@ -90,6 +151,9 @@ def detect_facial_mood(image_path):
 
 # --- Analyze image ---
 def analyze_image(image_path):
+    """
+    Analyzes a single image for mood, prioritizing facial detection.
+    """
     face_mood = detect_facial_mood(image_path)
     if face_mood and face_mood != "neutral":
         return face_mood
@@ -99,8 +163,12 @@ def analyze_image(image_path):
 
 # --- Analyze video ---
 def analyze_video(video_path):
+    """
+    Analyzes a video by sampling a few frames and determining the most common mood.
+    """
     cap = cv2.VideoCapture(video_path)
     frames = []
+    # Analyze a few frames to save processing time
     while len(frames) < 5:
         ret, frame = cap.read()
         if not ret:
@@ -115,7 +183,8 @@ def analyze_video(video_path):
         moods.append(analyze_image(temp_frame_path))
         os.remove(temp_frame_path)
 
-    return max(set(moods), key=moods.count) if moods else "happy"
+    # Return the most frequently detected mood
+    return max(set(moods), key=moods.count) if moods else "neutral"
 
 # --- Streamlit UI ---
 st.title("PicTune - AI Mood & Music Matcher 🎵")
@@ -135,61 +204,34 @@ if uploaded_file is not None:
 
     st.markdown(f"<div class='mood-box'>🎯 Detected Mood: {mood.capitalize()}</div>", unsafe_allow_html=True)
 
+    # Dictionary of moods and corresponding placeholder audio files.
+    # Replace these with your own mp3 files in the 'pictune-assets/music' directory.
     audio_files = {
         "happy": "pictune-assets/music/happy.mp3",
         "calm": "pictune-assets/music/calm.mp3",
         "sad": "pictune-assets/music/sad.mp3",
         "angry": "pictune-assets/music/angry.mp3",
-        "dreamy": "pictune-assets/music/dreamy.mp3"
+        "dreamy": "pictune-assets/music/dreamy.mp3",
+        "surprised": "pictune-assets/music/surprised.mp3",
+        "fearful": "pictune-assets/music/fearful.mp3",
+        "neutral": "pictune-assets/music/neutral.mp3",
+        "disgusted": "pictune-assets/music/disgusted.mp3"
     }
 
-    if mood in audio_files:
+    if mood in audio_files and os.path.exists(audio_files[mood]):
         st.audio(audio_files[mood])
+    elif mood in audio_files:
+        st.warning(f"Audio file for '{mood}' not found. Please add '{audio_files[mood]}' to your project.")
 
     os.remove(temp_file)
 
+# --- Footer ---
 st.markdown(
     """
-    <style>
-    .stApp {
-        background-color: #83EEFF;
-        font-family: 'Segoe UI', sans-serif;
-    }
-    h1 {
-        color: black !important;
-        text-align: center;
-        font-size: 3rem !important; /* Bigger title */
-        font-weight: 800 !important;
-    }
-    /* Subtitle: file uploader label */
-    .stFileUploader label {
-        color: black !important;
-        font-size: 1.3rem !important;
-        font-weight: 600 !important;
-    }
-    /* Upload box styling */
-    .stFileUploader {
-        transform: scale(1.1); /* Enlarge box */
-    }
-    .uploadedFile {
-        border-radius: 10px;
-        padding: 10px;
-    }
-    .mood-box {
-        background-color: white;
-        padding: 12px;
-        border-radius: 8px;
-        text-align: center;
-        font-size: 20px;
-        font-weight: bold;
-        color: #003344;
-        box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-        margin-top: 15px;
-    }
-    </style>
+    <div class="footer">
+        Made with ❤️ by Cyril Martin
+    </div>
     """,
     unsafe_allow_html=True
 )
 
-# if __name__ == "__main__":
-#    app.launch(server_name="0.0.0.0", server_port=int(os.environ.get("PORT", 5000)))
