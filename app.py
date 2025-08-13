@@ -10,20 +10,31 @@ st.markdown(
     """
     <style>
     /* Full page styling */
-    .stApp, .block-container {
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh; /* Full height layout */
+    .stApp {
         background-color: #83EEFF;
         font-family: 'Segoe UI', sans-serif;
-        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh; /* Make sure the app takes at least the full viewport height */
+        padding: 1rem; /* A little extra padding for the whole app */
     }
+    
+    /* Centralize the block container to handle spacing */
+    .block-container {
+        padding-top: 1rem !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        flex-grow: 1; /* Allow content to grow and push the footer down */
+    }
+
     /* Main title styling */
     h1 {
         color: black !important;
         text-align: center;
         font-size: 3rem !important;
         font-weight: 800 !important;
+        margin-top: 0 !important; /* Remove default top margin */
+        padding-top: 20px; /* Add padding to the top of the title */
         margin-bottom: 20px;
     }
     /* Subtitle: file uploader label */
@@ -31,19 +42,19 @@ st.markdown(
         color: black !important;
         font-size: 1.3rem !important;
         font-weight: 600 !important;
-        text-align: center;
+        text-align: center; /* Centralize the label text */
         width: 100%;
         display: block;
     }
     /* Upload box styling */
     .stFileUploader > div > div {
         display: flex;
-        justify-content: center;
+        justify-content: center; /* Centralize the drag-and-drop box */
     }
     .stFileUploader {
         transform: scale(1.1);
         margin: 20px 0;
-        padding: 0 10px;
+        padding: 0 10px; /* Add some space on the sides for a better look */
     }
     /* File uploader button style */
     .stFileUploader > div > div > div > button {
@@ -91,6 +102,10 @@ st.markdown(
 
 # --- Mood detection from color palette ---
 def detect_mood_from_palette(palette):
+    """
+    Analyzes a color palette to determine a mood based on simple heuristics.
+    This function has been expanded to include more moods.
+    """
     hsv_palette = [colorsys.rgb_to_hsv(r / 255, g / 255, b / 255) for r, g, b in palette]
     hues = [h for h, s, v in hsv_palette]
     sats = [s for h, s, v in hsv_palette]
@@ -99,15 +114,17 @@ def detect_mood_from_palette(palette):
     avg_sat = np.mean(sats)
     avg_val = np.mean(vals)
 
+    # Heuristics for the new moods
     if avg_sat < 0.2 and avg_val > 0.5:
         return "neutral"
     if avg_sat > 0.7 and avg_val > 0.7:
         return "surprised"
     if avg_val < 0.3:
-        return "fearful"
+        return "fearful"  # Dark, low-value colors
     if any(0.2 < h < 0.35 for h in hues) and avg_sat > 0.4:
-        return "disgusted"
+        return "disgusted" # Greenish hues
 
+    # Original moods logic
     if all(v < 0.3 for v in vals):
         return "angry"
     if all(v > 0.8 for v in vals) and all(s < 0.3 for s in sats):
@@ -123,10 +140,15 @@ def detect_mood_from_palette(palette):
     if any(0.7 < h < 0.9 for h in hues):
         return "dreamy"
 
-    return "neutral"
+    return "neutral" # A better fallback than "happy"
 
 # --- Basic facial emotion detection using OpenCV ---
 def detect_facial_mood(image_path):
+    """
+    Detects basic facial emotions (happy, calm, neutral) using Haar cascades.
+    Note: More complex emotions like surprise or fear require a more advanced
+    model than simple cascades.
+    """
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
     smile_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_smile.xml")
     eyes_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_eye.xml")
@@ -136,7 +158,7 @@ def detect_facial_mood(image_path):
 
     faces = face_cascade.detectMultiScale(gray, 1.3, 5)
     if len(faces) == 0:
-        return None
+        return None  # No face detected
 
     for (x, y, w, h) in faces:
         roi_gray = gray[y:y+h, x:x+w]
@@ -153,6 +175,9 @@ def detect_facial_mood(image_path):
 
 # --- Analyze image ---
 def analyze_image(image_path):
+    """
+    Analyzes a single image for mood, prioritizing facial detection.
+    """
     face_mood = detect_facial_mood(image_path)
     if face_mood and face_mood != "neutral":
         return face_mood
@@ -162,8 +187,12 @@ def analyze_image(image_path):
 
 # --- Analyze video ---
 def analyze_video(video_path):
+    """
+    Analyzes a video by sampling a few frames and determining the most common mood.
+    """
     cap = cv2.VideoCapture(video_path)
     frames = []
+    # Analyze a few frames to save processing time
     while len(frames) < 5:
         ret, frame = cap.read()
         if not ret:
@@ -178,6 +207,7 @@ def analyze_video(video_path):
         moods.append(analyze_image(temp_frame_path))
         os.remove(temp_frame_path)
 
+    # Return the most frequently detected mood
     return max(set(moods), key=moods.count) if moods else "neutral"
 
 # --- Streamlit UI ---
@@ -198,6 +228,8 @@ if uploaded_file is not None:
 
     st.markdown(f"<div class='mood-box'>🎯 Detected Mood: {mood.capitalize()}</div>", unsafe_allow_html=True)
 
+    # Dictionary of moods and corresponding placeholder audio files.
+    # Replace these with your own mp3 files in the 'pictune-assets/music' directory.
     audio_files = {
         "happy": "pictune-assets/music/happy.mp3",
         "calm": "pictune-assets/music/calm.mp3",
